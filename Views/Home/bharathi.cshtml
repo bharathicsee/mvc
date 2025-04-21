@@ -1,0 +1,197 @@
+﻿<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<!-- Load Handlebars.js -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+
+
+</head>
+<body>
+	<div class="container mt-5 ">
+		<h1 class="mb-4">User Info</h1>
+
+		<div class="row mb-10">
+			<div class="col-md-6 mb-3">
+				<label for="username" class="form-label">Username</label>
+				<input type="text" class="form-control" id="usernames" placeholder="Enter the user name">
+
+				<label for="address" class="form-label mt-3">Address</label>
+				<textarea class="form-control" id="address" placeholder="Enter the address" rows="6"></textarea>
+			</div>
+
+			<div class="col-md-6 mb-3">
+				<label for="password" class="form-label">Password</label>
+				<input type="password" class="form-control" id="password" placeholder="Enter the password">
+
+				<label for="date" class="form-label mt-3">Date</label>
+				<input type="date" class="form-control" id="date">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6 mb-3">
+				<label class="form-label">Department name</label>
+				<select class=" form-select" id="Department">
+					<option value="">select the Deparment</option>
+					<option value="1">cse</option>
+					<option value="2">eee</option>
+				</select>
+			</div>
+		</div>
+
+		<button type="submit" class="btn btn-info mt-3" onclick="validethedate()">Save & Next</button>
+
+		<div class="row">
+			<div class="col-md-6 mb-3">
+				<label id="usernamevalue" class="form-label mb-3"></label>
+				<label id="passwordvalue" class="form-label mb-3"></label>
+			</div>
+			<div class="col-md-6 mb-3">
+				<label id="addressvalue" class="form-label mb-3"></label>
+				<label id="datevalue" calss="form-label mb-3"></label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<table class="table table-bordered table-striped table-hover" id="userTable">
+					<thead class="table-dark">
+						<tr>
+							<th>Username</th>
+							<th>Password</th>
+							<th>Address</th>
+							<th>Date of Birth</th>
+							<th>Department</th>
+						</tr>
+					</thead>
+					<tbody id="userBody">
+						<!-- Rows will be inserted here dynamically -->
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<script id="userTemplate" type="text/x-handlebars-template">
+		{{#each users}}
+			<tr>
+				<td>{{userName}}</td>
+				<td>{{password}}</td>
+				<td>{{address}}</td>
+				<td>{{dateofBirth}}</td>
+				<td>{{department}}</td>
+			</tr>
+		{{/each}}
+	</script>
+
+	<script type="text/javascript">
+
+
+		function validethedate()
+		{
+			var isValid=true;
+			var usernameValue=$('#usernames').val();
+			if(usernameValue==""){
+				alert("Enter the usename");
+				isValid=false;
+			}
+			else{
+				$("#usernamevalue").html(usernameValue);
+			}
+			var passwordValue=$('#password').val();
+			if(passwordValue=="")
+			{
+				alert("enter the password");
+				isValid=false;
+			}
+			else{
+				$("#passwordvalue").html(passwordValue);
+			}
+			var adresssValue=$('#address').val();
+			if(adresssValue=="")
+			{
+			alert ("enter the adress");
+			isValid=false;
+			}
+			else{
+				$("#addressvalue").html(adresssValue);
+			}
+			var dateValue=$('#date').val();
+			if(dateValue=="")
+			{
+				alert("please put the date");
+				isValid=false;
+			}
+			else{
+				$("#datevalue").html(dateValue);
+			}
+			var departmentValue=$("#Department").val();
+			if (departmentValue=="")
+			{
+				isValid=false;
+				alert("enter the valid option");
+			}
+			if(isValid){
+				 const data = {
+				userName:usernameValue,
+				password:passwordValue,
+				address:adresssValue,
+				dateofBirth:dateValue,
+				department:parseInt(departmentValue)
+			};
+			 $.ajax({
+				url: '/Test/SaveUserInfo',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(data),
+				success: function (response) {
+					fetchData();
+				},
+				error: function (error) {
+					alert("Failed to submit data.");
+					console.error(error);
+				}
+			 });
+			}
+		}
+
+		function fetchData() {
+				$.ajax({
+					url: '/Test/getuserinfo',
+					method: 'GET',
+					success: function (data) {
+						renderTable(data);
+					},
+					error: function (error) {
+						console.error("Error fetching data:", error);
+						ALERT("Error")
+					}
+				});
+			}
+
+				 // Render the table using Handlebars.js
+		function renderTable(users) {
+			// Get the template HTML
+			var source = $("#userTemplate").html();
+
+			// Compile the template
+			var template = Handlebars.compile(source);
+
+			// Prepare data for the template
+			var context = { users: users };
+
+			// Generate the HTML with Handlebars and the provided data
+			var html = template(context);
+
+			// Insert the generated HTML into the table body
+			$("#userBody").html(html);
+		}
+
+
+
+			 $(document).ready(function () {
+			fetchData();
+		});
+
+	</script>
+</body>
+</html>
